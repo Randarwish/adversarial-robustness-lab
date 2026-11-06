@@ -1,0 +1,18 @@
+{
+  "attack": "AutoAttack",
+  "version": "standard",
+  "norm": "Linf",
+  "epsilon": 0.03137254901960784,
+  "seed": 42,
+  "attack_batch_size": 50,
+  "dataset": "CIFAR-10",
+  "split": "test",
+  "subset": "first 100 test images, indices 0-99",
+  "sample_count": 100,
+  "checkpoint": "checkpoints\\baseline_best.pt",
+  "checkpoint_sha256": "804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f",
+  "checkpoint_epoch": 9,
+  "clean_subset_accuracy": 0.7299999594688416,
+  "accuracy_surviving_attack_suite": 0.0,
+  "largest_pixel_change": 0.03137257695198059
+}
