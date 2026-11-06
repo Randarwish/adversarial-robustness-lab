@@ -1,0 +1,60 @@
+{
+  "configuration": {
+    "method": "clean-only fine-tuning from baseline",
+    "epochs": 5,
+    "learning_rate": 0.0001,
+    "batch_size": 128,
+    "training_attack": null,
+    "clean_loss_weight": 1.0,
+    "attacked_loss_weight": 0.0,
+    "validation_attack": "PGD",
+    "validation_epsilon": 0.03137254901960784,
+    "validation_step_size": 0.00784313725490196,
+    "validation_attack_steps": 20,
+    "validation_random_start": true,
+    "validation_restarts": 1,
+    "validation_seed": 12345,
+    "seed": 42,
+    "training_images": 45000,
+    "validation_images": 5000,
+    "selection": "highest PGD validation survival accuracy, then highest clean validation accuracy",
+    "baseline_checkpoint_sha256": "804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f"
+  },
+  "history": [
+    {
+      "epoch": 0,
+      "clean_validation_accuracy": 0.7044,
+      "pgd_validation_survival_accuracy": 0.0018
+    },
+    {
+      "epoch": 1,
+      "training_loss": 0.5739133889092339,
+      "clean_validation_accuracy": 0.7142,
+      "pgd_validation_survival_accuracy": 0.0026
+    },
+    {
+      "epoch": 2,
+      "training_loss": 0.5567763955646091,
+      "clean_validation_accuracy": 0.7138,
+      "pgd_validation_survival_accuracy": 0.0022
+    },
+    {
+      "epoch": 3,
+      "training_loss": 0.5464617296960619,
+      "clean_validation_accuracy": 0.7164,
+      "pgd_validation_survival_accuracy": 0.0016
+    },
+    {
+      "epoch": 4,
+      "training_loss": 0.5381314350975884,
+      "clean_validation_accuracy": 0.7172,
+      "pgd_validation_survival_accuracy": 0.0012
+    },
+    {
+      "epoch": 5,
+      "training_loss": 0.5296256032837762,
+      "clean_validation_accuracy": 0.7198,
+      "pgd_validation_survival_accuracy": 0.0018
+    }
+  ]
+}
