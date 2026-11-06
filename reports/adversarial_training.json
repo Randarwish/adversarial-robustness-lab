@@ -1,0 +1,58 @@
+{
+  "configuration": {
+    "method": "adversarial fine-tuning from baseline",
+    "epochs": 5,
+    "learning_rate": 0.0001,
+    "batch_size": 128,
+    "epsilon": 0.03137254901960784,
+    "step_size": 0.00784313725490196,
+    "training_attack_steps": 7,
+    "validation_attack_steps": 20,
+    "random_start": true,
+    "restarts": 1,
+    "clean_loss_weight": 0.5,
+    "attacked_loss_weight": 0.5,
+    "seed": 42,
+    "training_images": 45000,
+    "validation_images": 5000,
+    "selection": "highest PGD validation survival accuracy, then highest clean validation accuracy",
+    "baseline_checkpoint_sha256": "804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f"
+  },
+  "history": [
+    {
+      "epoch": 0,
+      "clean_validation_accuracy": 0.7044,
+      "pgd_validation_survival_accuracy": 0.0018
+    },
+    {
+      "epoch": 1,
+      "training_loss": 2.3306981481340197,
+      "clean_validation_accuracy": 0.6366,
+      "pgd_validation_survival_accuracy": 0.036
+    },
+    {
+      "epoch": 2,
+      "training_loss": 1.9091831956015692,
+      "clean_validation_accuracy": 0.6286,
+      "pgd_validation_survival_accuracy": 0.0646
+    },
+    {
+      "epoch": 3,
+      "training_loss": 1.8146435135735406,
+      "clean_validation_accuracy": 0.6296,
+      "pgd_validation_survival_accuracy": 0.0812
+    },
+    {
+      "epoch": 4,
+      "training_loss": 1.7555066259596084,
+      "clean_validation_accuracy": 0.633,
+      "pgd_validation_survival_accuracy": 0.1004
+    },
+    {
+      "epoch": 5,
+      "training_loss": 1.7112755778418647,
+      "clean_validation_accuracy": 0.634,
+      "pgd_validation_survival_accuracy": 0.1138
+    }
+  ]
+}

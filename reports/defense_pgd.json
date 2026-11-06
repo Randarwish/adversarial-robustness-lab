@@ -1,0 +1,33 @@
+{
+  "model": "adversarially fine-tuned classifier",
+  "checkpoint": "checkpoints/adversarial_best.pt",
+  "checkpoint_sha256": "6c9503043e6f9d8b5108277ba92684e4f131e83c92d9d9a129e3f96d43d4fdfc",
+  "checkpoint_epoch": 5,
+  "starting_baseline_sha256": "804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f",
+  "dataset": "CIFAR-10",
+  "split": "test",
+  "test_images": 10000,
+  "attack": "PGD",
+  "targeted": false,
+  "norm": "Linf",
+  "epsilon": 0.03137254901960784,
+  "step_size": 0.00784313725490196,
+  "steps": 20,
+  "random_start": true,
+  "restarts": 1,
+  "seed": 42,
+  "batch_size": 128,
+  "pixel_range": [
+    0.0,
+    1.0
+  ],
+  "clean_correct": 6307,
+  "clean_accuracy": 0.6307,
+  "correct_after_attack": 1152,
+  "accuracy_under_attack": 0.1152,
+  "correct_before_and_after_attack": 1152,
+  "pgd_survival_accuracy": 0.1152,
+  "successful_attacks_on_initially_correct": 5155,
+  "attack_success_rate_on_initially_correct": 0.8173458062470271,
+  "largest_pixel_change": 0.03137257695198059
+}
