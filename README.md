@@ -1,7 +1,7 @@
 # Adversarial Robustness Lab
 
-A reproducible experiment comparing an image classifier before and
-after adversarial fine-tuning on CIFAR-10.
+An experiment comparing a CIFAR-10 image classifier before and
+after adversarial fine-tuning.
 
 ## Main finding
 
@@ -11,45 +11,30 @@ under the standard AutoAttack suite from 0.06% to 6.72% at an
 
 Clean test accuracy decreased from 70.29% to 63.07%.
 
-This is a measured improvement in attack resistance, with substantial
-vulnerability remaining. It is not a security guarantee.
+The defense improved resistance to the evaluated attacks, but
+substantial vulnerability remains. These results are empirical
+measurements, not security guarantees.
 
-## Model and dataset
+## Test results
 
-- Dataset: CIFAR-10.
-- Model: a small convolutional neural network.
-- Trainable parameters: 545,098.
-- Training split: 45,000 images.
-- Validation split: 5,000 images.
-- Test split: 10,000 images.
-- Input pixel values: [0, 1].
-- Baseline checkpoint selection: highest clean validation accuracy.
-- Defense checkpoint selection: highest PGD validation survival
-  accuracy, breaking ties using clean validation accuracy.
-
-Training and validation use a fixed split with seed 42.
-The separate test split is used for final evaluation.
-
-## Baseline versus defense
-
-| Test evaluation | Baseline | Adversarially fine-tuned |
+| Evaluation | Baseline | Adversarially fine-tuned |
 |---|---:|---:|
 | Clean accuracy | 70.29% | 63.07% |
 | PGD accuracy at 8/255 | 0.07% | 11.52% |
 | AutoAttack accuracy at 8/255 | 0.06% | 6.72% |
 
-All evaluations use the full 10,000-image test split.
+All evaluations above use the full 10,000-image test split.
 
 The defense increased AutoAttack accuracy by 6.66 percentage points
 and reduced clean accuracy by 7.22 percentage points.
 
-The defense retained 672 correct predictions after AutoAttack,
-compared with 6 for the baseline.
+After AutoAttack, 672 images remained correctly classified by the
+defense, compared with 6 by the baseline.
 
-Under AutoAttack, 89.35% of the defense's initially correct
-predictions became incorrect.
+AutoAttack fooled 89.35% of the defense's initially correct
+predictions.
 
-## Baseline FGSM results
+### Baseline FGSM results
 
 | Maximum pixel-channel change | Test accuracy |
 |---|---:|
@@ -59,22 +44,43 @@ predictions became incorrect.
 | 4/255 | 13.27% |
 | 8/255 | 1.54% |
 
-These results supersede the earlier baseline measurements.
+These measurements supersede the earlier baseline results.
+
+## Model and data
+
+- Dataset: CIFAR-10.
+- Architecture: a small convolutional neural network.
+- Trainable parameters: 545,098.
+- Training images: 45,000.
+- Validation images: 5,000.
+- Test images: 10,000.
+- Input shape: 3 color channels, 32 pixels high, 32 pixels wide.
+- Pixel values: [0, 1].
+- Train/validation split seed: 42.
+
+The baseline checkpoint is selected by clean validation accuracy.
+
+The defense checkpoint is selected by PGD validation survival
+accuracy, breaking ties using clean validation accuracy.
+The starting checkpoint is also included as a selection candidate.
+
+Training images update model parameters. Validation images select
+checkpoints. The separate test split measures final performance.
 
 ## Threat model
 
-During evaluation attacks, the model's weights remain fixed.
-The attacker modifies input pixels within a specified limit.
+During evaluation, model weights remain fixed while attacks modify
+image pixels.
 
-FGSM and the custom PGD implementation are untargeted, white-box
-attacks using the correct labels.
+The perturbation limit is the maximum absolute change to any pixel
+channel, also called the Linf constraint. At 8/255, that limit is
+approximately 0.031373 on the [0, 1] input scale.
 
-The standard AutoAttack suite includes gradient-based and
-query-based methods, including targeted components.
+FGSM and our custom PGD attack are untargeted, white-box attacks
+using the correct labels.
 
-All reported adversarial evaluations use the maximum absolute
-pixel-channel change, also called the Linf constraint.
-Images are constrained to the valid pixel range [0, 1].
+AutoAttack's standard suite combines gradient-based and query-based
+methods and includes targeted components.
 
 ## Attack configurations
 
@@ -82,7 +88,8 @@ Images are constrained to the valid pixel range [0, 1].
 
 - One gradient-based step.
 - Cross-entropy loss.
-- Epsilon values: 0, 1/255, 2/255, 4/255, and 8/255.
+- Epsilon: 0, 1/255, 2/255, 4/255, and 8/255.
+- Resulting pixel values clipped to [0, 1].
 
 ### Projected Gradient Descent
 
@@ -92,12 +99,13 @@ Images are constrained to the valid pixel range [0, 1].
 - Cross-entropy loss.
 - One random starting point per image.
 - No additional restarts.
-- Seed: 42 for test evaluation.
+- Test evaluation seed: 42.
 - Batch size: 128.
+- Projection into the permitted region after every step.
 
-The defense evaluation reports both accuracy after the attack
-and survival accuracy: the fraction of all test images classified
-correctly both before and after the attack.
+The defense report distinguishes accuracy after the attack from
+survival accuracy: the fraction of all images classified correctly
+both before and after the attack.
 
 Both defense measurements were 11.52% in this run.
 
@@ -112,11 +120,12 @@ https://github.com/fra31/auto-attack
 - Seed: 42.
 - Attack batch size: 50.
 - Evaluation size: all 10,000 test images.
+- Source revision: a39220048b3c9f2cca9a4d3a54604793c68eca7e.
 
-Later components attack examples that remain correctly classified
+Later components attack images that remain correctly classified
 after earlier components.
 
-For the defense, accuracy surviving the suite changed as follows:
+Defense results by stage:
 
 | Stage | Survival accuracy |
 |---|---:|
@@ -126,15 +135,16 @@ For the defense, accuracy surviving the suite changed as follows:
 | After FAB-T | 6.72% |
 | After Square Attack | 6.72% |
 
-The stronger suite found failures missed by our 20-step PGD
-evaluation.
-
-Surviving these attacks does not prove that an image is robust.
+The suite found failures missed by our 20-step PGD evaluation.
+Surviving the suite does not prove that an image is robust.
 
 ## Adversarial fine-tuning
 
 The defense starts from the trained baseline checkpoint.
-It does not train a second model from scratch.
+
+For each training batch, PGD generates attacked images using the
+current model. Model parameters are then updated using an equal
+mixture of clean and attacked-image cross-entropy losses.
 
 Configuration:
 
@@ -146,50 +156,22 @@ Configuration:
 - Training epsilon: 8/255.
 - Training step size: 2/255.
 - One random starting point per image.
-- Loss: 50% clean cross-entropy and 50% attacked cross-entropy.
+- Loss weights: 50% clean, 50% attacked.
 - Validation attack: 20-step PGD at the same epsilon.
-- Starting checkpoint included as a selection candidate.
 
-Adversarial examples are regenerated using the current model for
-each training batch.
-
-Only training images update model parameters.
-Validation performance selects the defense checkpoint.
-
-## Example attack
+## Example
 
 An initially correct baseline prediction changed from cat to dog
 under FGSM at 8/255.
 
-From left to right:
-
-1. Original image.
-2. Attacked image.
-3. Magnified absolute pixel differences.
+Left: original image.
+Middle: attacked image.
+Right: magnified absolute pixel differences.
 
 ![FGSM example](reports/fgsm_example.png)
 
-This is a selected successful attack example.
-The numerical evaluations cover the full test split.
-
-## Checkpoint identities
-
-The evaluation reports record checkpoint SHA256 fingerprints.
-
-Baseline:
-
-```text
-804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f
-```
-
-Adversarially fine-tuned model:
-
-```text
-6c9503043e6f9d8b5108277ba92684e4f131e83c92d9d9a129e3f96d43d4fdfc
-```
-
-Fingerprints identify the evaluated files. They do not make
-training deterministic or certify model security.
+This example was selected because the attack succeeded.
+The numerical comparison uses the full test split.
 
 ## Run locally
 
@@ -201,19 +183,21 @@ Recorded environment:
 - Torchvision 0.26.0+cu128.
 - NVIDIA GeForce RTX 4050 Laptop GPU with 6 GB graphics memory.
 
-The following installation uses the CUDA 12.8 package index
-for a compatible NVIDIA environment.
+Git must be installed to install AutoAttack from its pinned source
+revision. The requirements target a compatible NVIDIA environment.
+
+From the project folder, create an environment and install:
 
 ```powershell
 py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
-.\.venv\Scripts\python.exe -m pip install git+https://github.com/fra31/auto-attack
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-The AutoAttack installation command uses its current default
-revision. The exact source revision remains to be documented.
+The requirements pin PyTorch, Torchvision, and the exact AutoAttack
+revision used in this experiment. Supporting dependencies are not
+fully locked.
 
-### Train and evaluate the baseline
+### Baseline
 
 ```powershell
 .\.venv\Scripts\python.exe check_gpu.py
@@ -226,7 +210,7 @@ revision. The exact source revision remains to be documented.
 .\.venv\Scripts\python.exe evaluate_autoattack.py
 ```
 
-### Train and evaluate the defense
+### Defense
 
 ```powershell
 .\.venv\Scripts\python.exe train_adversarial.py
@@ -234,19 +218,39 @@ revision. The exact source revision remains to be documented.
 .\.venv\Scripts\python.exe evaluate_defense_autoattack.py
 ```
 
-The defense training script stops if its checkpoint or training
-history already exists, preventing accidental replacement.
-
 The dataset downloads during the first inspection run.
-Checkpoints are created by training and are excluded from Git.
+Training creates checkpoints, which are excluded from Git.
 
-Retraining can produce different results.
+The defense training script stops if its checkpoint or history
+already exists, preventing accidental replacement.
+
 If a checkpoint changes, rerun all evaluations that use it.
+Exact training results may vary across environments.
+
+## Checkpoint identities
+
+Evaluation reports record SHA256 fingerprints identifying the
+model files used.
+
+Baseline:
+
+```text
+804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f
+```
+
+Defense:
+
+```text
+6c9503043e6f9d8b5108277ba92684e4f131e83c92d9d9a129e3f96d43d4fdfc
+```
+
+Fingerprints do not guarantee deterministic training or model security.
 
 ## Project files
 
 | File | Purpose |
 |---|---|
+| `requirements.txt` | Pin primary packages and AutoAttack revision |
 | `check_gpu.py` | Verify graphics-card access |
 | `inspect_data.py` | Download and inspect CIFAR-10 |
 | `model.py` | Define the classifier |
@@ -257,7 +261,7 @@ If a checkpoint changes, rerun all evaluations that use it.
 | `attack_pgd.py` | Implement PGD |
 | `evaluate_pgd.py` | Evaluate baseline PGD performance |
 | `evaluate_autoattack.py` | Evaluate baseline AutoAttack performance |
-| `train_adversarial.py` | Fine-tune using clean and attacked images |
+| `train_adversarial.py` | Fine-tune with clean and attacked images |
 | `evaluate_defense.py` | Evaluate defense clean and PGD performance |
 | `evaluate_defense_autoattack.py` | Evaluate defense with AutoAttack |
 
@@ -265,40 +269,37 @@ If a checkpoint changes, rerun all evaluations that use it.
 
 | File | Contents |
 |---|---|
-| `reports/baseline.json` | Clean baseline test results |
+| `reports/baseline.json` | Clean baseline results |
 | `reports/fgsm.json` | Baseline FGSM results |
 | `reports/pgd.json` | Baseline PGD results |
-| `reports/fgsm_example.png` | Selected baseline attack example |
-| `reports/autoattack_trial.json` | Preliminary 100-image evaluation |
+| `reports/fgsm_example.png` | Selected attack example |
+| `reports/autoattack_trial.json` | Preliminary 100-image results |
 | `reports/autoattack_trial.log` | Preliminary evaluation log |
 | `reports/autoattack_full.json` | Full baseline AutoAttack results |
 | `reports/autoattack_full.log` | Full baseline AutoAttack log |
 | `reports/adversarial_training.json` | Defense configuration and validation history |
-| `reports/defense_pgd.json` | Defense clean and PGD test results |
-| `reports/defense_autoattack.json` | Defense AutoAttack test results |
+| `reports/defense_pgd.json` | Defense clean and PGD results |
+| `reports/defense_autoattack.json` | Defense AutoAttack results |
 | `reports/defense_autoattack.log` | Defense AutoAttack log |
 
-The preliminary trial is separate from the full-test results
-and is not used in the main comparison.
+The preliminary trial is not included in the full-test comparison.
 
 ## Limitations
 
-- One model architecture and one baseline/defense checkpoint pair.
-- No repeated training across multiple seeds.
-- Defense uses additional training beyond the baseline; there is
-  no matched clean-only fine-tuning control.
-- Custom PGD evaluation uses one random start and its final iterate,
-  rather than retaining every successful intermediate attack.
-- Exact AutoAttack source revision is not yet pinned.
-- Original checkpoints are not distributed in this repository.
-- Results concern bounded pixel perturbations on CIFAR-10 and do
-  not establish real-world deployment security.
-- No certified robustness guarantee is provided.
+- One architecture and one baseline/defense checkpoint pair.
+- Training has not been repeated across multiple seeds.
+- The defense receives additional training; there is no matched
+  clean-only fine-tuning control.
+- Custom PGD uses one random start and its final iterate rather
+  than retaining successful intermediate attacks.
+- Supporting dependencies are not fully locked.
+- Original checkpoints are not distributed.
+- Results concern bounded pixel perturbations on CIFAR-10.
+- No certified robustness or deployment-security guarantee is provided.
 
 ## Next experiments
 
-- Record and pin the installed AutoAttack source revision.
 - Add a matched clean-only fine-tuning control.
-- Evaluate across multiple training seeds.
 - Strengthen custom PGD evaluation with multiple restarts and
   retention of successful intermediate attacks.
+- Repeat training across multiple seeds.
