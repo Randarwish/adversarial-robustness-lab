@@ -1,0 +1,9 @@
+{
+  "checkpoint": "checkpoints/baseline_best.pt",
+  "checkpoint_epoch": 9,
+  "dataset": "CIFAR-10",
+  "split": "test",
+  "test_images": 10000,
+  "correct_predictions": 7010,
+  "clean_accuracy": 0.701
+}
