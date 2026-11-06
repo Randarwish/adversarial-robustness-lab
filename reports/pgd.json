@@ -1,0 +1,26 @@
+{
+  "attack": "PGD",
+  "targeted": false,
+  "norm": "Linf",
+  "epsilon": 0.03137254901960784,
+  "step_size": 0.00784313725490196,
+  "steps": 20,
+  "random_start": true,
+  "restarts": 1,
+  "seed": 42,
+  "pixel_range": [
+    0.0,
+    1.0
+  ],
+  "checkpoint": "checkpoints/baseline_best.pt",
+  "checkpoint_epoch": 9,
+  "dataset": "CIFAR-10",
+  "split": "test",
+  "test_images": 10000,
+  "clean_accuracy": 0.7029,
+  "accuracy_under_attack": 0.0007,
+  "initially_correct": 7029,
+  "successful_attacks_on_initially_correct": 7022,
+  "attack_success_rate_on_initially_correct": 0.9990041257646891,
+  "largest_pixel_change": 0.03137257695198059
+}
