@@ -1,0 +1,33 @@
+{
+  "model": "baseline",
+  "checkpoint": "checkpoints/baseline_best.pt",
+  "checkpoint_sha256": "804dcdd45f32abade22306d8746c229ab3185b107cb7fb8086a10eb5c163801f",
+  "checkpoint_epoch": 9,
+  "dataset": "CIFAR-10",
+  "split": "test",
+  "test_images": 10000,
+  "attack": "PGD with restarts and candidate retention",
+  "targeted": false,
+  "norm": "Linf",
+  "epsilon": 0.03137254901960784,
+  "step_size": 0.00784313725490196,
+  "steps_per_restart": 40,
+  "restarts": 5,
+  "random_start": true,
+  "includes_original_candidate": true,
+  "retains_successful_intermediate_attacks": true,
+  "candidate_selection": "prefer misclassified candidates; then higher cross-entropy among equal success status",
+  "seed": 42,
+  "batch_size": 128,
+  "pixel_range": [
+    0.0,
+    1.0
+  ],
+  "clean_correct": 7029,
+  "clean_accuracy": 0.7029,
+  "correct_before_and_after_attack": 7,
+  "pgd_survival_accuracy": 0.0007,
+  "successful_attacks_on_initially_correct": 7022,
+  "attack_success_rate_on_initially_correct": 0.9990041257646891,
+  "largest_pixel_change": 0.03137257695198059
+}
